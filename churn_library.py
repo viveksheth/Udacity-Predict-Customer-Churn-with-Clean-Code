@@ -125,6 +125,7 @@ def encoder_helper(dataframe, category_lst, response='Churn'):
     output:
                     dataframe: pandas dataframe with new columns for
     '''
+    category_groups = []
     for category in category_lst:
         category_groups = dataframe.groupby(category).mean()[response]
         new_feature = category + '_' + response
@@ -148,8 +149,8 @@ def perform_feature_engineering(dataframe, response='Churn'):
                       could be used for naming variables or index y column]
 
     output:
-                      X_train: X training data
-                      X_test: X testing data
+                      x_train: X training data
+                      x_test: X testing data
                       y_train: y training data
                       y_test: y testing data
     '''
@@ -166,10 +167,10 @@ def perform_feature_engineering(dataframe, response='Churn'):
     y = dataframe[response]
     X = dataframe.drop(response, axis=1)
     # train test split
-    X_train, X_test, y_train, y_test = train_test_split(
+    x_train, x_test, y_train, y_test = train_test_split(
         X, y, test_size=0.3, random_state=42)
 
-    return X_train, X_test, y_train, y_test
+    return x_train, x_test, y_train, y_test
 
 
 def plot_classification_report(model_name,
@@ -271,7 +272,7 @@ def classification_report_image(y_train,
     plt.close()
 
 
-def feature_importance_plot(model, X_data, model_name, output_pth):
+def feature_importance_plot(model, x_data, model_name, output_pth):
     '''
     creates and stores the feature importances in pth
 
@@ -290,7 +291,7 @@ def feature_importance_plot(model, X_data, model_name, output_pth):
     indices = np.argsort(importances)[::-1]
 
     # Rearrange feature names so they match the sorted feature importances
-    names = [X_data.columns[i] for i in indices]
+    names = [x_data.columns[i] for i in indices]
 
     # Create plot
     plt.figure(figsize=(20, 5))
@@ -300,10 +301,10 @@ def feature_importance_plot(model, X_data, model_name, output_pth):
     plt.ylabel('Importance')
 
     # Add bars
-    plt.bar(range(X_data.shape[1]), importances[indices])
+    plt.bar(range(x_data.shape[1]), importances[indices])
 
     # Add feature names as x-axis labels
-    plt.xticks(range(X_data.shape[1]), names, rotation=90)
+    plt.xticks(range(x_data.shape[1]), names, rotation=90)
 
     # Save figure to output_pth
     fig_name = f'feature_importance_{model_name}.png'
@@ -327,7 +328,7 @@ def confusion_matrix(model, model_name, X_test, y_test):
         '''
     class_names = ['Not Churned', 'Churned']
     plt.figure(figsize=(15, 5))
-    ax = plt.gca()
+    ax_plot = plt.gca()
     plot_confusion_matrix(model,
                           X_test,
                           y_test,
@@ -335,9 +336,9 @@ def confusion_matrix(model, model_name, X_test, y_test):
                           cmap=plt.cm.Blues,
                           xticks_rotation='horizontal',
                           colorbar=False,
-                          ax=ax)
+                          ax=ax_plot)
     # Hide grid lines
-    ax.grid(False)
+    ax_plot.grid(False)
     plt.title(f'{model_name} Confusion Matrix on test data')
     plt.savefig(
         os.path.join(
@@ -348,13 +349,13 @@ def confusion_matrix(model, model_name, X_test, y_test):
     plt.close()
 
 
-def train_models(X_train, X_test, y_train, y_test):
+def train_models(x_train, x_test, y_train, y_test):
     '''
     train, store model results: images + scores, and store models
 
     input:
-                      X_train: X training data
-                      X_test: X testing data
+                      x_train: X training data
+                      x_test: X testing data
                       y_train: y training data
                       y_test: y testing data
     output:
@@ -380,17 +381,17 @@ def train_models(X_train, X_test, y_train, y_test):
     cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
 
     # Train Ramdom Forest using GridSearch
-    cv_rfc.fit(X_train, y_train)
+    cv_rfc.fit(x_train, y_train)
 
     # Train Logistic Regression
-    lrc.fit(X_train, y_train)
+    lrc.fit(x_train, y_train)
 
     # get predictions
-    y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
-    y_test_preds_rf = cv_rfc.best_estimator_.predict(X_test)
+    y_train_preds_rf = cv_rfc.best_estimator_.predict(x_train)
+    y_test_preds_rf = cv_rfc.best_estimator_.predict(x_test)
 
-    y_train_preds_lr = lrc.predict(X_train)
-    y_test_preds_lr = lrc.predict(X_test)
+    y_train_preds_lr = lrc.predict(x_train)
+    y_test_preds_lr = lrc.predict(x_test)
 
     # calculate classification scores
     classification_report_image(y_train,
@@ -402,16 +403,16 @@ def train_models(X_train, X_test, y_train, y_test):
 
     # plot ROC-curves
     plt.figure(figsize=(15, 8))
-    ax = plt.gca()
+    ax_plot = plt.gca()
     plot_roc_curve(
         cv_rfc.best_estimator_,
-        X_test,
+        x_test,
         y_test,
-        ax=ax,
+        ax=ax_plot,
         alpha=0.8
     )
-    
-    plot_roc_curve(lrc, X_test, y_test, ax=ax, alpha=0.8)
+
+    plot_roc_curve(lrc, x_test, y_test, ax=ax_plot, alpha=0.8)
 
     # save ROC-curves to images directory
     plt.savefig(
@@ -425,7 +426,7 @@ def train_models(X_train, X_test, y_train, y_test):
     joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
     joblib.dump(lrc, './models/logistic_model.pkl')
 
-    for model, model_type in zip([cv_rfc.best_estimator_, lrc], 
+    for model, model_type in zip([cv_rfc.best_estimator_, lrc],
                                  ['Random_Forest', 'Logistic_Regression']
                                  ):
 
@@ -434,8 +435,8 @@ def train_models(X_train, X_test, y_train, y_test):
 
     # Display feature importance on train data
     feature_importance_plot(cv_rfc.best_estimator_,
-                            X_train, 
-                            'Random_Forest', 
+                            X_train,
+                            'Random_Forest',
                             "./images/results")
 
 
@@ -443,7 +444,8 @@ if __name__ == "__main__":
     dataset = import_data("./data/bank_data.csv")
     print('Dataset successfully loaded...Now conducting data exploration')
     perform_eda(dataset)
-    X_train, X_test, y_train, y_test = perform_feature_engineering(dataset, response='Churn')
+    X_train_model, X_test_data, y_train_model, y_test_data = perform_feature_engineering(
+        dataset, response='Churn')
     print('Start training the data...please wait')
-    train_models(X_train, X_test, y_train, y_test)
+    train_models(X_train_model, X_test_data,  y_train_model, y_test_data)
     print('Training completed. Best model weights + performance matrics saved')
