@@ -18,6 +18,7 @@ from sklearn.metrics import plot_roc_curve, classification_report, plot_confusio
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 sns.set()
 
 os.environ['QT_QPA_PLATFORM'] = 'offscreen'
@@ -40,10 +41,10 @@ def import_data(pth):
 
     # Drop redudant Attrition_Flag variable (replaced by Churn response
     # variable)
-    dataframe.drop('Attrition_Flag', axis=1, inplace=True)
+    # dataframe.drop('Attrition_Flag', axis=1, inplace=True)
 
     # Drop variable not relevant for the prediction model
-    dataframe.drop('CLIENTNUM', axis=1, inplace=True)
+    # dataframe.drop('CLIENTNUM', axis=1, inplace=True)
 
     return dataframe
 
@@ -58,58 +59,31 @@ def perform_eda(dataframe):
     output:
                     None
     '''
-
+ 
     # Analyze categorical features and plot distribution
-    cat_columns = dataframe.select_dtypes(include='object').columns.tolist()
-    for cat_column in cat_columns:
-        plt.figure(figsize=(7, 4))
-        (dataframe[cat_column]
-            .value_counts('normalize')
-            .plot(kind='bar',
-                  rot=45,
-                  title=f'{cat_column} - % Churn')
+    plt.figure(figsize=(20,10))
+    dataframe['Churn'].hist()
+    plt.savefig(fname='./images/eda/churn_distribution.png')
 
-         )
-        plt.savefig(os.path.join("./images/eda", f'{cat_column}.png'))
-        plt.show()
-        plt.close()
+    # Marital Status Distribution
+    plt.figure(figsize=(20, 10))
+    dataframe.Marital_Status.value_counts('normalize').plot(kind='bar')
+    plt.savefig(fname='./images/eda/marital_status_distribution.png')
 
-    # Analyze Numeric features
-    plt.figure(figsize=(10, 5))
-    (dataframe['Customer_Age']
-        .plot(kind='hist',
-              title='Distribution of Customer Age')
-     )
-    plt.savefig(os.path.join("./images/eda", 'Customer_Age.png'),
-                box_inches='tight')
-    plt.show()
-    plt.close()
+    # Customer age distribution  
+    plt.figure(figsize=(20,10))
+    dataframe['Customer_Age'].hist()
+    plt.savefig(fname='./images/eda/customer_age_distribution.png')
 
-    plt.figure(figsize=(10, 5))
-    # Show distributions of 'Total_Trans_Ct' and add a smooth curve obtained
-    # using a kernel density estimate
-    sns.histplot(dataframe['Total_Trans_Ct'], stat='density', kde=True)
-    plt.show()
-    plt.close()
+    # Total Transaction Distribution
+    plt.figure(figsize=(20, 10))
+    sns.histplot(dataframe['Total_Trans_Ct'],kde=True);
+    plt.savefig(fname='./images/eda/total_transaction_distribution.png')
 
-    # plot correlation matrix
-    plt.figure(figsize=(15, 7))
-    sns.heatmap(dataframe.corr(), annot=False, cmap='Dark2_r', linewidths=2)
-    plt.savefig(os.path.join("./images/eda", 'correlation_matrix.png'),
-                box_inches='tight')
-    plt.show()
-    plt.close()
-
-    plt.figure(figsize=(15, 7))
-    (dataframe[['Total_Trans_Amt', 'Total_Trans_Ct']]
-        .plot(x='Total_Trans_Amt',
-              y='Total_Trans_Ct',
-              kind='scatter',
-              title='Correlation analysis between 2 features')
-     )
-    plt.show()
-    plt.close()
-
+    # Heatmap
+    plt.figure(figsize=(20, 10))
+    sns.heatmap(dataframe.corr(), annot=False, linewidths=3, cmap='Dark2_r')
+    plt.savefig(fname='./images/eda/data_heatmap.png')
 
 def encoder_helper(dataframe, category_lst, response='Churn'):
     '''
@@ -230,8 +204,8 @@ def plot_classification_report(model_name,
         bbox_inches='tight')
 
     # Display figure
-    plt.show()
-    plt.close()
+    # plt.show()
+    # plt.close()
 
 
 def classification_report_image(y_train,
@@ -257,22 +231,42 @@ def classification_report_image(y_train,
                      None
     '''
 
-    plot_classification_report('Logistic Regression',
-                               y_train,
-                               y_test,
-                               y_train_preds_lr,
-                               y_test_preds_lr)
-    plt.close()
+    # RandomForestClassifier 
+    plt.rc('figure', figsize=(6, 6))
+    plt.text(0.01, 1.25,
+             str('Random Forest Train'),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.05,
+             str(classification_report(y_test, y_test_preds_rf)),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.6,
+             str('Random Forest Test'),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.7,
+             str(classification_report(y_train, y_train_preds_rf)),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.axis('off')
+    plt.savefig(fname='./images/results/rf_results.png')
 
-    plot_classification_report('Random Forest',
-                               y_train,
-                               y_test,
-                               y_train_preds_rf,
-                               y_test_preds_rf)
-    plt.close()
+    # LogisticRegression 
+    plt.rc('figure', figsize=(6, 6))
+    plt.text(0.01, 1.25,
+             str('Logistic Regression Train'),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.05,
+             str(classification_report(y_train, y_train_preds_lr)),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.6,
+             str('Logistic Regression Test'),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.text(0.01, 0.7,
+             str(classification_report(y_test, y_test_preds_lr)),
+             {'fontsize': 10}, fontproperties='monospace')
+    plt.axis('off')
+    plt.savefig(fname='./images/results/logistic_results.png')
 
 
-def feature_importance_plot(model, x_data, model_name, output_pth):
+def feature_importance_plot(model, features, output_pth):
     '''
     creates and stores the feature importances in pth
 
@@ -285,34 +279,30 @@ def feature_importance_plot(model, x_data, model_name, output_pth):
                      None
     '''
 
-    # Calculate feature importances
-    importances = model.feature_importances_
-    # Sort feature importances in descending order
+     # Feature importances
+    importances = model.best_estimator_.feature_importances_
+
+    # Sort Feature importances in descending order
     indices = np.argsort(importances)[::-1]
 
-    # Rearrange feature names so they match the sorted feature importances
-    names = [x_data.columns[i] for i in indices]
+    # Sorted feature importances
+    names = [features.columns[i] for i in indices]
 
     # Create plot
-    plt.figure(figsize=(20, 5))
+    plt.figure(figsize=(25, 15))
 
     # Create plot title
-    plt.title(f"Feature Importance for {model_name}")
+    plt.title("Feature Importance")
     plt.ylabel('Importance')
 
     # Add bars
-    plt.bar(range(x_data.shape[1]), importances[indices])
+    plt.bar(range(features.shape[1]), importances[indices])
 
-    # Add feature names as x-axis labels
-    plt.xticks(range(x_data.shape[1]), names, rotation=90)
+    # x-axis labels
+    plt.xticks(range(features.shape[1]), names, rotation=90)
 
-    # Save figure to output_pth
-    fig_name = f'feature_importance_{model_name}.png'
-    plt.savefig(os.path.join(output_pth, fig_name), bbox_inches='tight')
-
-    # display feature importance figure
-    plt.show()
-    plt.close()
+    # Save the image
+    plt.savefig(fname=output_pth + 'feature_importances.png')
 
 
 def confusion_matrix(model, model_name, X_test, y_test):
@@ -345,11 +335,11 @@ def confusion_matrix(model, model_name, X_test, y_test):
             "./images/results",
             f'{model_name}_Confusion_Matrix'),
         bbox_inches='tight')
-    plt.show()
-    plt.close()
+    # # plt.show()
+    # plt.close()
 
 
-def train_models(x_train, x_test, y_train, y_test):
+def train_models(X_train, X_test, y_train, y_test):
     '''
     train, store model results: images + scores, and store models
 
@@ -361,91 +351,61 @@ def train_models(x_train, x_test, y_train, y_test):
     output:
                       None
     '''
-    # Initialize Random Forest model
-    rfc = RandomForestClassifier(random_state=42)
 
-    # Initialize Logistic Regression model
-    lrc = LogisticRegression(solver='lbfgs', max_iter=3000)
-    # Use a different solver if the default 'lbfgs' fails to converge
-    # Reference:
-    # https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+    # RandomForestClassifier and LogisticRegression
+    rfc = RandomForestClassifier(random_state=42, n_jobs=-1)
+    lrc = LogisticRegression(n_jobs=-1, max_iter=1000)
 
-    # grid search for random forest parameters and instantiation
-    param_grid = {
-        'n_estimators': [400, 600],
-        'max_features': ['auto', 'sqrt'],
-        'max_depth': [4, 5, 100],
-        'criterion': ['gini', 'entropy']
-    }
+    # Parameters for Grid Search
+    param_grid = {'n_estimators': [200, 500],
+                  'max_features': [ 'sqrt'],
+                  'max_depth' : [4, 5, 100],
+                  'criterion' :['gini', 'entropy']}
 
+    # Grid Search and fit for RandomForestClassifier
     cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
+    cv_rfc.fit(X_train, y_train)
 
-    # Train Ramdom Forest using GridSearch
-    cv_rfc.fit(x_train, y_train)
+    # LogisticRegression
+    lrc.fit(X_train, y_train)
 
-    # Train Logistic Regression
-    lrc.fit(x_train, y_train)
-
-    # get predictions
-    y_train_preds_rf = cv_rfc.best_estimator_.predict(x_train)
-    y_test_preds_rf = cv_rfc.best_estimator_.predict(x_test)
-
-    y_train_preds_lr = lrc.predict(x_train)
-    y_test_preds_lr = lrc.predict(x_test)
-
-    # calculate classification scores
-    classification_report_image(y_train,
-                                y_test,
-                                y_train_preds_lr,
-                                y_train_preds_rf,
-                                y_test_preds_lr,
-                                y_test_preds_rf)
-
-    # plot ROC-curves
-    plt.figure(figsize=(15, 8))
-    ax_plot = plt.gca()
-    plot_roc_curve(
-        cv_rfc.best_estimator_,
-        x_test,
-        y_test,
-        ax=ax_plot,
-        alpha=0.8
-    )
-
-    plot_roc_curve(lrc, x_test, y_test, ax=ax_plot, alpha=0.8)
-
-    # save ROC-curves to images directory
-    plt.savefig(
-        os.path.join(
-            "./images/results",
-            'ROC_curves.png'),
-        bbox_inches='tight')
-    plt.close()
-
-    # save best model
+    # Save best models
     joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
     joblib.dump(lrc, './models/logistic_model.pkl')
 
-    for model, model_type in zip([cv_rfc.best_estimator_, lrc],
-                                 ['Random_Forest', 'Logistic_Regression']
-                                 ):
+    # Compute train and test predictions for RandomForestClassifier
+    y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
+    y_test_preds_rf  = cv_rfc.best_estimator_.predict(X_test)
 
-        # Display confusion matrix on test data
-        confusion_matrix(model, model_type, X_test, y_test)
+    # Compute train and test predictions for LogisticRegression
+    y_train_preds_lr = lrc.predict(X_train)
+    y_test_preds_lr  = lrc.predict(X_test)
 
-    # Display feature importance on train data
-    feature_importance_plot(cv_rfc.best_estimator_,
-                            X_train,
-                            'Random_Forest',
-                            "./images/results")
+    # Compute ROC curve
+    plt.figure(figsize=(15, 8))
+    axis = plt.gca()
+    lrc_plot = plot_roc_curve(lrc, X_test, y_test, ax=axis, alpha=0.8)                          
+    rfc_disp = plot_roc_curve(cv_rfc.best_estimator_, X_test, y_test, ax=axis, alpha=0.8)       
+    plt.savefig(fname='./images/results/roc_curve_result.png')
+    #plt.show()
 
+    # Compute and results
+    classification_report_image(y_train, y_test,
+                                y_train_preds_lr, y_train_preds_rf,
+                                y_test_preds_lr,  y_test_preds_rf)
+
+    # Compute and feature importance
+    feature_importance_plot(model=cv_rfc,
+                            features=X_test,
+                            output_pth='./images/results/')
 
 if __name__ == "__main__":
     dataset = import_data("./data/bank_data.csv")
-    print('Dataset successfully loaded...Now conducting data exploration')
+    print('Dataset is loaded successfully.')
     perform_eda(dataset)
-    X_train_model, X_test_data, y_train_model, y_test_data = perform_feature_engineering(
+    x_train_model, x_test_data, y_train_model, y_test_data = perform_feature_engineering(
         dataset, response='Churn')
-    print('Start training the data...please wait')
-    train_models(X_train_model, X_test_data,  y_train_model, y_test_data)
-    print('Training completed. Best model weights + performance matrics saved')
+    print('Training data...')
+    train_models(x_train_model, x_test_data,  y_train_model, y_test_data)
+    print('Model training completed')
+          
