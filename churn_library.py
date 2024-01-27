@@ -11,13 +11,13 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import plot_roc_curve, classification_report, plot_confusion_matrix
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 sns.set()
 
@@ -59,9 +59,9 @@ def perform_eda(dataframe):
     output:
                     None
     '''
- 
+
     # Analyze categorical features and plot distribution
-    plt.figure(figsize=(20,10))
+    plt.figure(figsize=(20, 10))
     dataframe['Churn'].hist()
     plt.savefig(fname='./images/eda/churn_distribution.png')
 
@@ -70,20 +70,21 @@ def perform_eda(dataframe):
     dataframe.Marital_Status.value_counts('normalize').plot(kind='bar')
     plt.savefig(fname='./images/eda/marital_status_distribution.png')
 
-    # Customer age distribution  
-    plt.figure(figsize=(20,10))
+    # Customer age distribution
+    plt.figure(figsize=(20, 10))
     dataframe['Customer_Age'].hist()
     plt.savefig(fname='./images/eda/customer_age_distribution.png')
 
     # Total Transaction Distribution
     plt.figure(figsize=(20, 10))
-    sns.histplot(dataframe['Total_Trans_Ct'],kde=True);
+    sns.histplot(dataframe['Total_Trans_Ct'], kde=True)
     plt.savefig(fname='./images/eda/total_transaction_distribution.png')
 
     # Heatmap
     plt.figure(figsize=(20, 10))
     sns.heatmap(dataframe.corr(), annot=False, linewidths=3, cmap='Dark2_r')
     plt.savefig(fname='./images/eda/data_heatmap.png')
+
 
 def encoder_helper(dataframe, category_lst, response='Churn'):
     '''
@@ -134,15 +135,12 @@ def perform_feature_engineering(dataframe, response='Churn'):
 
     # Encode categorical features using mean of response variable on category
     dataframe = encoder_helper(dataframe, cat_columns, response='Churn')
-    # Alternative to the encodign approach above - Not used here
-    # convert categorical features to dummy variable
-    #df = pd.get_dummies(df, columns=cat_columns, drop_first=True, prefix=response)
 
-    y = dataframe[response]
-    X = dataframe.drop(response, axis=1)
+    y_data = dataframe[response]
+    x_data = dataframe.drop(response, axis=1)
     # train test split
     x_train, x_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=42)
+        x_data, y_data, test_size=0.3, random_state=42)
 
     return x_train, x_test, y_train, y_test
 
@@ -231,7 +229,7 @@ def classification_report_image(y_train,
                      None
     '''
 
-    # RandomForestClassifier 
+    # RandomForestClassifier
     plt.rc('figure', figsize=(6, 6))
     plt.text(0.01, 1.25,
              str('Random Forest Train'),
@@ -248,7 +246,7 @@ def classification_report_image(y_train,
     plt.axis('off')
     plt.savefig(fname='./images/results/rf_results.png')
 
-    # LogisticRegression 
+    # LogisticRegression
     plt.rc('figure', figsize=(6, 6))
     plt.text(0.01, 1.25,
              str('Logistic Regression Train'),
@@ -279,7 +277,7 @@ def feature_importance_plot(model, features, output_pth):
                      None
     '''
 
-     # Feature importances
+    # Feature importances
     importances = model.best_estimator_.feature_importances_
 
     # Sort Feature importances in descending order
@@ -339,7 +337,7 @@ def confusion_matrix(model, model_name, X_test, y_test):
     # plt.close()
 
 
-def train_models(X_train, X_test, y_train, y_test):
+def train_models(x_train, x_test, y_train, y_test):
     '''
     train, store model results: images + scores, and store models
 
@@ -358,54 +356,66 @@ def train_models(X_train, X_test, y_train, y_test):
 
     # Parameters for Grid Search
     param_grid = {'n_estimators': [200, 500],
-                  'max_features': [ 'sqrt'],
-                  'max_depth' : [4, 5, 100],
-                  'criterion' :['gini', 'entropy']}
+                  'max_features': ['sqrt'],
+                  'max_depth': [4, 5, 100],
+                  'criterion': ['gini', 'entropy']}
 
     # Grid Search and fit for RandomForestClassifier
     cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
-    cv_rfc.fit(X_train, y_train)
+    cv_rfc.fit(x_train, y_train)
 
     # LogisticRegression
-    lrc.fit(X_train, y_train)
+    lrc.fit(x_train, y_train)
 
     # Save best models
     joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
     joblib.dump(lrc, './models/logistic_model.pkl')
 
     # Compute train and test predictions for RandomForestClassifier
-    y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
-    y_test_preds_rf  = cv_rfc.best_estimator_.predict(X_test)
+    y_train_preds_rf = cv_rfc.best_estimator_.predict(x_train)
+    y_test_preds_rf = cv_rfc.best_estimator_.predict(x_test)
 
     # Compute train and test predictions for LogisticRegression
-    y_train_preds_lr = lrc.predict(X_train)
-    y_test_preds_lr  = lrc.predict(X_test)
+    y_train_preds_lr = lrc.predict(x_train)
+    y_test_preds_lr = lrc.predict(x_test)
 
     # Compute ROC curve
     plt.figure(figsize=(15, 8))
     axis = plt.gca()
-    lrc_plot = plot_roc_curve(lrc, X_test, y_test, ax=axis, alpha=0.8)                          
-    rfc_disp = plot_roc_curve(cv_rfc.best_estimator_, X_test, y_test, ax=axis, alpha=0.8)       
+    lrc_plot = plot_roc_curve(lrc, x_test, y_test, ax=axis, alpha=0.8)
+    rfc_disp = plot_roc_curve(
+        cv_rfc.best_estimator_,
+        x_test,
+        y_test,
+        ax=axis,
+        alpha=0.8)
     plt.savefig(fname='./images/results/roc_curve_result.png')
-    #plt.show()
+    # plt.show()
 
-    # Compute and results
+    # Compute and results reported into images
     classification_report_image(y_train, y_test,
                                 y_train_preds_lr, y_train_preds_rf,
-                                y_test_preds_lr,  y_test_preds_rf)
+                                y_test_preds_lr, y_test_preds_rf)
 
-    # Compute and feature importance
+    # Compute and feature importance and save images
     feature_importance_plot(model=cv_rfc,
-                            features=X_test,
+                            features=x_test,
                             output_pth='./images/results/')
 
+
 if __name__ == "__main__":
+    # Load dataset
     dataset = import_data("./data/bank_data.csv")
     print('Dataset is loaded successfully.')
+
+    # Perform EDA on dataset
     perform_eda(dataset)
+
+    # Perform feature engineering for model training
     x_train_model, x_test_data, y_train_model, y_test_data = perform_feature_engineering(
         dataset, response='Churn')
+
+    # Train dataset
     print('Training data...')
-    train_models(x_train_model, x_test_data,  y_train_model, y_test_data)
+    train_models(x_train_model, x_test_data, y_train_model, y_test_data)
     print('Model training completed')
-          

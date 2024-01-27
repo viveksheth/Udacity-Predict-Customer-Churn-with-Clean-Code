@@ -1,15 +1,7 @@
 # Udacity-Predict-Customer-Churn-with-Clean-Code
 
 ## Project Description
-This is the first project of Udacity's Machine Learning DevOps Engineer Nanodegree.
-The project objective is to produce production-ready clean code using best practices.
-The project itself aims at predicting customer churn for banking customers. This is a classification problem.
-The project proposes the following approach:
-- Load and explore the dataset composed of over 10k samples (EDA)
-- Prepare data for training (feature engineering resulting into 19 features)
-- Train two classification models (sklearn random forest and logistic regression)
-- Identify most important features influencing the predictions and visualize their impact using SHAP library
-- Save best models with their performance metrics
+The objective of this project is to produce production-ready clean code using best practices. The project includes a python package for a machine learning project that follows coding best practices (PEP8) and best practice of software development such as modules, documentations and unit tests. 
 
 ## Files and data description
 #### Overview of the files and data present in the root directory
@@ -32,3 +24,29 @@ The project is organized with the following directory architecture:
 
 
 ## Running Files
+## Setup your enviornment 
+
+Python version: 3.9.x 
+
+#### 1. Clone the repository. 
+
+#### 2. Install libraries: 
+
+```python3 -m pip install -r requirements_py3.9.txt```
+
+#### 3. Install linter and auto-formatter: 
+
+```pip3 install pylint autopep8``` 
+
+#### 4. Run code 
+
+To run project script: ```python3 churn_library.py```
+
+To run unit tests: ```python3 churn_script_logging_and_tests.py```
+
+
+
+
+
+
+

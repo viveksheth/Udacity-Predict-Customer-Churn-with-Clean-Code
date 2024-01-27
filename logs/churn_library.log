@@ -1,15 +1,15 @@
-2024-01-26 15:08:00,319 - root - INFO: test_import_data: Data import is successful.
-2024-01-26 15:08:00,319 - root - INFO: Data imported: [Rows: 10127	Columns: 22]
-2024-01-26 15:08:01,213 - root - INFO: Testing function perform_eda() is successful
-2024-01-26 15:08:01,213 - root - INFO: File churn_distribution.png was found
-2024-01-26 15:08:01,213 - root - INFO: File marital_status_distribution.png was found
-2024-01-26 15:08:01,213 - root - INFO: File customer_age_distribution.png was found
-2024-01-26 15:08:01,213 - root - INFO: File total_transaction_distribution.png was found
-2024-01-26 15:08:01,214 - root - INFO: File data_heatmap.png was found
-2024-01-26 15:08:01,502 - root - INFO: Testing perform_feature_engineering - SUCCESS
-2024-01-26 15:08:01,502 - root - INFO: perform_feature_engineering returned Train / Test set of shape (7088, 21) (3039, 21)
-2024-01-26 15:08:01,742 - root - INFO: Testing encoder_helper with ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category', 'Card_Category'] - is successful
-2024-01-26 15:08:29,081 - root - INFO: File logistic_model.pkl was found
-2024-01-26 15:08:29,081 - root - INFO: File rfc_model.pkl was found
-2024-01-26 15:08:29,081 - root - INFO: File roc_curve_result.png was found
-2024-01-26 15:08:29,081 - root - INFO: File rf_results.png was found
+2024-01-27 13:13:11,530 - root - INFO: test_import_data: Data import is successful.
+2024-01-27 13:13:11,530 - root - INFO: Data imported: [Rows: 10127	Columns: 22]
+2024-01-27 13:13:12,451 - root - INFO: Testing function perform_eda() is successful
+2024-01-27 13:13:12,451 - root - INFO: File churn_distribution.png was found
+2024-01-27 13:13:12,451 - root - INFO: File marital_status_distribution.png was found
+2024-01-27 13:13:12,451 - root - INFO: File customer_age_distribution.png was found
+2024-01-27 13:13:12,451 - root - INFO: File total_transaction_distribution.png was found
+2024-01-27 13:13:12,451 - root - INFO: File data_heatmap.png was found
+2024-01-27 13:13:12,742 - root - INFO: Testing of perform_feature_engineering is successful
+2024-01-27 13:13:12,742 - root - INFO: perform_feature_engineering returned Train / Test set of shape (7088, 21) (3039, 21)
+2024-01-27 13:13:12,984 - root - INFO: Testing encoder_helper with ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category', 'Card_Category'] - is successful
+2024-01-27 13:13:39,546 - root - INFO: File logistic_model.pkl was found
+2024-01-27 13:13:39,546 - root - INFO: File rfc_model.pkl was found
+2024-01-27 13:13:39,546 - root - INFO: File roc_curve_result.png was found
+2024-01-27 13:13:39,546 - root - INFO: File rf_results.png was found
